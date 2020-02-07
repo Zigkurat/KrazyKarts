@@ -15,7 +15,15 @@ public:
 	AGoKart();
 
 private:
+	UPROPERTY(EditAnywhere)
+	float Mass = 1000;
+
+	UPROPERTY(EditAnywhere)
+	float MaxDrivingForce = 10000;
+
 	FVector Velocity;
+
+	float Throttle;
 
 public:	
 	virtual void Tick(float DeltaTime) override;
