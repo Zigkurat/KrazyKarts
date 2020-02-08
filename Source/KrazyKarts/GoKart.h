@@ -24,6 +24,9 @@ private:
 	UPROPERTY(EditAnywhere)
 	float MaxDegreesPerSecond = 90;
 
+	UPROPERTY(EditAnywhere)
+	float DragCoefficient = 16;
+
 	FVector Velocity;
 
 	float Throttle;
@@ -46,4 +49,6 @@ private:
 	void UpdateLocationFromVelocity(float DeltaTime);
 
 	void ApplyRotation(float DeltaTime);
+
+	FVector GetResistance();
 };
