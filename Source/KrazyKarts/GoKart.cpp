@@ -26,18 +26,16 @@ void AGoKart::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
-	if (IsLocallyControlled())
-	{
+	if (Role == ROLE_AutonomousProxy) {
 		FGoKartMove Move = CreateMove(DeltaTime);
-
-		if (!HasAuthority()) {
-			UnacknowledgedMoves.Add(Move);
-		}
-
-		Server_SendMove(Move);
+		UnacknowledgedMoves.Add(Move);
 		SimulateMove(Move);
+		Server_SendMove(Move);
+	}
 
-		UE_LOG(LogTemp, Warning, TEXT("Unacknowledged moves count is %d"), UnacknowledgedMoves.Num());
+	if (Role == ROLE_Authority && GetRemoteRole() == ROLE_SimulatedProxy) {
+		FGoKartMove Move = CreateMove(DeltaTime);
+		Server_SendMove(Move);
 	}
 }
 
