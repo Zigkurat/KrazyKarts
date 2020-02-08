@@ -50,6 +50,10 @@ void AGoKart::SetupPlayerInputComponent(UInputComponent *PlayerInputComponent)
 void AGoKart::GetLifetimeReplicatedProps(TArray<FLifetimeProperty> &OutLifetimeProps) const
 {
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+
+	DOREPLIFETIME(AGoKart, Velocity);
+	DOREPLIFETIME(AGoKart, Throttle);
+	DOREPLIFETIME(AGoKart, SteeringThrow);
 	DOREPLIFETIME(AGoKart, ReplicatedTransform);
 }
 
