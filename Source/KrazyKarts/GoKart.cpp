@@ -22,8 +22,7 @@ void AGoKart::Tick(float DeltaTime)
 
 	Velocity += Acceleration * DeltaTime;
 
-	FVector DeltaTranslation = Velocity * 100 * DeltaTime;
-	AddActorWorldOffset(DeltaTranslation);
+	UpdateLocationFromVelocity(DeltaTime);	
 }
 
 void AGoKart::SetupPlayerInputComponent(UInputComponent *PlayerInputComponent)
@@ -36,4 +35,14 @@ void AGoKart::SetupPlayerInputComponent(UInputComponent *PlayerInputComponent)
 void AGoKart::MoveForward(float Value)
 {
 	Throttle = Value;
+}
+
+void AGoKart::UpdateLocationFromVelocity(float DeltaTime) {
+	FVector DeltaTranslation = Velocity * 100 * DeltaTime;
+
+	FHitResult HitResult;
+	AddActorWorldOffset(DeltaTranslation, true, &HitResult);
+	if (HitResult.IsValidBlockingHit()) {
+		Velocity = FVector::ZeroVector;
+	}
 }
