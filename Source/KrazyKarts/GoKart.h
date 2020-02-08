@@ -21,9 +21,14 @@ private:
 	UPROPERTY(EditAnywhere)
 	float MaxDrivingForce = 10000;
 
+	UPROPERTY(EditAnywhere)
+	float MaxDegreesPerSecond = 90;
+
 	FVector Velocity;
 
 	float Throttle;
+
+	float SteeringThrow;
 
 public:	
 	virtual void Tick(float DeltaTime) override;
@@ -36,5 +41,9 @@ protected:
 private:
 	void MoveForward(float Value);
 
+	void MoveRight(float Value);
+
 	void UpdateLocationFromVelocity(float DeltaTime);
+
+	void ApplyRotation(float DeltaTime);
 };
