@@ -36,10 +36,13 @@ private:
 
 	float SteeringThrow;
 
-public:	
+	UPROPERTY(ReplicatedUsing=OnRep_ReplicatedTransform)
+	FTransform ReplicatedTransform;
+
+public:
 	virtual void Tick(float DeltaTime) override;
 
-	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
+	virtual void SetupPlayerInputComponent(class UInputComponent *PlayerInputComponent) override;
 
 protected:
 	virtual void BeginPlay() override;
@@ -50,6 +53,13 @@ private:
 
 	UFUNCTION(Server, Reliable, WithValidation)
 	void Server_MoveRight(float Value);
+
+	UFUNCTION()
+	void OnRep_ReplicatedTransform();
+
+	void MoveForward(float Value);
+
+	void MoveRight(float Value);
 
 	void UpdateLocationFromVelocity(float DeltaTime);
 
