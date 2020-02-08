@@ -25,7 +25,10 @@ private:
 	float MaxDegreesPerSecond = 90;
 
 	UPROPERTY(EditAnywhere)
-	float DragCoefficient = 16;
+	float AirResistanceCoefficient = 16;
+
+	UPROPERTY(EditAnywhere)
+	float RollingResistanceCoefficient = 0.015;
 
 	FVector Velocity;
 
@@ -50,5 +53,7 @@ private:
 
 	void ApplyRotation(float DeltaTime);
 
-	FVector GetResistance();
+	FVector GetAirResistance();
+
+	FVector GetRollingResistance();
 };
