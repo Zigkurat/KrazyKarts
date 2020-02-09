@@ -2,6 +2,7 @@
 
 #include "GoKartMovementReplicator.h"
 #include "Net/UnrealNetwork.h"
+#include "GameFramework/Actor.h"
 
 UGoKartMovementReplicator::UGoKartMovementReplicator()
 {
@@ -92,8 +93,13 @@ void UGoKartMovementReplicator::SimulatedProxy_OnRep_ServerState() {
 	if (ensure(MovementComponent)) {
 		ClientTimeBetweenLastUpdates = ClientTimeSinceUpdate;
 		ClientTimeSinceUpdate = 0;
-		ClientStartTransform = GetOwner()->GetActorTransform();
-		ClientStartVelocity = MovementComponent->GetVelocity();
+		if (ensure(MeshOffsetRoot)) {
+			ClientStartTransform.SetLocation(MeshOffsetRoot->GetComponentLocation());
+			ClientStartTransform.SetRotation(MeshOffsetRoot->GetComponentQuat());
+			ClientStartVelocity = MovementComponent->GetVelocity();
+		}
+
+		GetOwner()->SetActorTransform(ServerState.Transform);
 	}
 }
 
@@ -141,8 +147,10 @@ FHermiteCubicSpline UGoKartMovementReplicator::CreateSpline() {
 }
 
 void UGoKartMovementReplicator::InterpolateLocation(const FHermiteCubicSpline &Spline, float LerpRatio) {
-	FVector NewLocation = Spline.InterpolateLocation(LerpRatio);
-	GetOwner()->SetActorLocation(NewLocation);
+	if (ensure(MeshOffsetRoot)) {
+		FVector NewLocation = Spline.InterpolateLocation(LerpRatio);
+		MeshOffsetRoot->SetWorldLocation(NewLocation);
+	}
 }
 
 void UGoKartMovementReplicator::InterpolateVelocity(const FHermiteCubicSpline &Spline, float LerpRatio) {
@@ -152,8 +160,10 @@ void UGoKartMovementReplicator::InterpolateVelocity(const FHermiteCubicSpline &S
 }
 
 void UGoKartMovementReplicator::InterpolateRotation(const FHermiteCubicSpline &Spline, float LerpRatio) {
-	FQuat StartRotation = ClientStartTransform.GetRotation();
-	FQuat TargetRotation = ServerState.Transform.GetRotation();
-	FQuat NewRotation = FQuat::Slerp(StartRotation, TargetRotation, LerpRatio);
-	GetOwner()->SetActorRotation(NewRotation);
+	if (ensure(MeshOffsetRoot)) {
+		FQuat StartRotation = ClientStartTransform.GetRotation();
+		FQuat TargetRotation = ServerState.Transform.GetRotation();
+		FQuat NewRotation = FQuat::Slerp(StartRotation, TargetRotation, LerpRatio);
+		MeshOffsetRoot->SetWorldRotation(NewRotation);
+	}
 }

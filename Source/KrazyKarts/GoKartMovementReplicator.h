@@ -52,6 +52,9 @@ private:
 	UPROPERTY()
 	UGoKartMovementComponent *MovementComponent;
 
+	UPROPERTY()
+	USceneComponent *MeshOffsetRoot;
+
 	TArray<FGoKartMove> UnacknowledgedMoves;
 
 	float ClientTimeSinceUpdate;
@@ -67,6 +70,9 @@ public:
 
 protected:
 	virtual void BeginPlay() override;
+
+	UFUNCTION(BlueprintCallable)
+	void SetMeshOffsetRoot(USceneComponent *Root) { MeshOffsetRoot = Root; };
 
 private:
 	UFUNCTION(Server, Reliable, WithValidation)

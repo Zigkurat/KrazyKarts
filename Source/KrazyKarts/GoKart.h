@@ -16,11 +16,11 @@ class KRAZYKARTS_API AGoKart : public APawn
 public:
 	AGoKart();
 
-private:
-	UPROPERTY(VisibleAnywhere)
+public:
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
 	UGoKartMovementComponent *MovementComponent;
 
-	UPROPERTY(VisibleAnywhere)
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
 	UGoKartMovementReplicator *MovementReplicator;
 
 public:
