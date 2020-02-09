@@ -39,6 +39,12 @@ private:
 
 	TArray<FGoKartMove> UnacknowledgedMoves;
 
+	float ClientTimeSinceUpdate;
+
+	float ClientTimeBetweenLastUpdates;
+
+	FTransform ClientStartTransform;
+
 public:	
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 
@@ -52,7 +58,13 @@ private:
 	UFUNCTION()
 	void OnRep_ServerState();
 
+	void AuthonomousProxy_OnRep_ServerState();
+
+	void SimulatedProxy_OnRep_ServerState();
+
 	void UpdateServerState(const FGoKartMove &Move);
+
+	void TickClient(float DeltaTime);
 	
 	void ClearAcknowledgedMoves(FGoKartMove LastMove);
 

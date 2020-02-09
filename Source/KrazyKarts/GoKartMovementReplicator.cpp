@@ -36,7 +36,7 @@ void UGoKartMovementReplicator::TickComponent(float DeltaTime, ELevelTick TickTy
 
 		if (GetOwnerRole() == ROLE_SimulatedProxy)
 		{
-			MovementComponent->SimulateMove(ServerState.LastMove);
+			TickClient(DeltaTime);
 		}
 	}
 }
@@ -65,6 +65,15 @@ bool UGoKartMovementReplicator::Server_SendMove_Validate(FGoKartMove Move)
 
 void UGoKartMovementReplicator::OnRep_ServerState()
 {
+	if (GetOwnerRole() == ROLE_AutonomousProxy) {
+		AuthonomousProxy_OnRep_ServerState();
+	}
+	if (GetOwnerRole() == ROLE_SimulatedProxy) {
+		SimulatedProxy_OnRep_ServerState();
+	}
+}
+
+void UGoKartMovementReplicator::AuthonomousProxy_OnRep_ServerState() {
 	if (ensure(MovementComponent))
 	{
 		GetOwner()->SetActorTransform(ServerState.Transform);
@@ -79,10 +88,34 @@ void UGoKartMovementReplicator::OnRep_ServerState()
 	}
 }
 
+void UGoKartMovementReplicator::SimulatedProxy_OnRep_ServerState() {
+	ClientTimeBetweenLastUpdates = ClientTimeSinceUpdate;
+	ClientTimeSinceUpdate = 0;
+	ClientStartTransform = GetOwner()->GetActorTransform();
+}
+
 void UGoKartMovementReplicator::UpdateServerState(const FGoKartMove &Move) {
 	ServerState.LastMove = Move;
 	ServerState.Velocity = MovementComponent->GetVelocity();
 	ServerState.Transform = GetOwner()->GetActorTransform();
+}
+
+void UGoKartMovementReplicator::TickClient(float DeltaTime) {
+	ClientTimeSinceUpdate += DeltaTime;
+
+	if (ClientTimeBetweenLastUpdates > KINDA_SMALL_NUMBER) {
+		float LerpRatio = ClientTimeSinceUpdate / ClientTimeBetweenLastUpdates;
+
+		FVector StartLocation = ClientStartTransform.GetLocation();
+		FVector TargetLocation = ServerState.Transform.GetLocation();
+		FVector NewLocation = FMath::LerpStable(StartLocation, TargetLocation, LerpRatio);
+		GetOwner()->SetActorLocation(NewLocation);
+
+		FQuat StartRotation = ClientStartTransform.GetRotation();
+		FQuat TargetRotation = ServerState.Transform.GetRotation();
+		FQuat NewRotation = FQuat::Slerp(StartRotation, TargetRotation, LerpRatio);
+		GetOwner()->SetActorRotation(NewRotation);
+	}
 }
 
 void UGoKartMovementReplicator::ClearAcknowledgedMoves(FGoKartMove LastMove)
