@@ -34,10 +34,10 @@ private:
 	UPROPERTY(ReplicatedUsing = OnRep_ServerState)
 	FGoKartState ServerState;
 
-	TArray<FGoKartMove> UnacknowledgedMoves;
-
 	UPROPERTY()
 	UGoKartMovementComponent *MovementComponent;
+
+	TArray<FGoKartMove> UnacknowledgedMoves;
 
 public:	
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
@@ -51,6 +51,8 @@ private:
 
 	UFUNCTION()
 	void OnRep_ServerState();
+
+	void UpdateServerState(const FGoKartMove &Move);
 	
 	void ClearAcknowledgedMoves(FGoKartMove LastMove);
 

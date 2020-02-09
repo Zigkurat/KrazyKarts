@@ -22,18 +22,16 @@ void UGoKartMovementReplicator::TickComponent(float DeltaTime, ELevelTick TickTy
 
 	if (ensure(MovementComponent))
 	{
+		FGoKartMove LastMove = MovementComponent->GetLastMove();
 		if (GetOwnerRole() == ROLE_AutonomousProxy)
 		{
-			FGoKartMove Move = MovementComponent->CreateMove(DeltaTime);
-			UnacknowledgedMoves.Add(Move);
-			MovementComponent->SimulateMove(Move);
-			Server_SendMove(Move);
+			UnacknowledgedMoves.Add(LastMove);
+			Server_SendMove(LastMove);
 		}
 
-		if (GetOwnerRole() == ROLE_Authority && GetOwner()->GetRemoteRole() == ROLE_SimulatedProxy)
+		if (GetOwner()->GetRemoteRole() == ROLE_SimulatedProxy)
 		{
-			FGoKartMove Move = MovementComponent->CreateMove(DeltaTime);
-			Server_SendMove(Move);
+			UpdateServerState(LastMove);
 		}
 
 		if (GetOwnerRole() == ROLE_SimulatedProxy)
@@ -56,9 +54,7 @@ void UGoKartMovementReplicator::Server_SendMove_Implementation(FGoKartMove Move)
 	{
 		MovementComponent->SimulateMove(Move);
 
-		ServerState.LastMove = Move;
-		ServerState.Velocity = MovementComponent->GetVelocity();
-		ServerState.Transform = GetOwner()->GetActorTransform();
+		UpdateServerState(Move);
 	}
 }
 
@@ -81,6 +77,12 @@ void UGoKartMovementReplicator::OnRep_ServerState()
 			MovementComponent->SimulateMove(Move);
 		}
 	}
+}
+
+void UGoKartMovementReplicator::UpdateServerState(const FGoKartMove &Move) {
+	ServerState.LastMove = Move;
+	ServerState.Velocity = MovementComponent->GetVelocity();
+	ServerState.Transform = GetOwner()->GetActorTransform();
 }
 
 void UGoKartMovementReplicator::ClearAcknowledgedMoves(FGoKartMove LastMove)
